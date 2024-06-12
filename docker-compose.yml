@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  public-api-cinema:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # args:
+      #   GITHUB_ACCESS_TOKEN: ${GITHUB_ACCESS_TOKEN}
+    volumes:
+      - ./:/app
+    networks:
+      default: {}
+    restart: always
+    ports:
+      - 0.0.0.0:${PORT:-8000}:8000
+    environment:
+      AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-SECRET}
+      AUTH_REFRESH_SECRET_KEY: ${AUTH_REFRESH_SECRET_KEY:-REFRESH_SECRET}
+      AUTH_ALGORITHM: ${ALGORITHM:-HS256}
+      AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-20}
+      AUTH_REFRESH_TOKEN_EXPIRE_MINUTES: ${AUTH_REFRESH_TOKEN_EXPIRE_MINUTES:-1440}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_SERVER: ${POSTGRES_SERVER:-postgres-db}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+  postgres-db:
+      image: postgres:14.1-alpine
+      restart: always
+      networks:
+        default: {}
+      environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+      ports:
+        - '5432:5432'
+      volumes: 
+        - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
